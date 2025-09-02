@@ -29,10 +29,22 @@ layer_defs = [
 
 var editor;
 
+function forceHighlight() {
+    const model = editor.getModel();
+    if (!model) return;
+
+    // Force tokenization
+    monaco.editor.tokenize(model.getValue(), model.getLanguageId());
+
+    // 🔑 Force a repaint by "jiggling" the layout
+    const h = editor.getScrollTop();
+    editor.setScrollTop(h + 1);
+    editor.setScrollTop(h);
+}
+
 require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs' }});
 require(['vs/editor/editor.main'], function() {
 
-    // Create editor
     editor = monaco.editor.create(document.getElementById('editor'), {
         value: CODE,
         language: 'javascript',
@@ -43,16 +55,6 @@ require(['vs/editor/editor.main'], function() {
         contextmenu: false,
         fontSize: 12
     });
-
-    // Listen for changes
-    editor.onDidChangeModelContent(() => {
-        const code = editor.getValue();
-        console.clear();
-        console.log('Current code:', code);
-    });
-
-    // Optional: handle resizing
-    window.addEventListener('resize', () => editor.layout());
 
     doit();
 });
@@ -146,6 +148,7 @@ function loadModel() {
 }
 function editModel() {
     showTab("tab1-editor");
+    setTimeout(() => forceHighlight(), 1);
 }
 const editLoadModelButton = document.getElementById('edit-load-model');
 editLoadModelButton.addEventListener('click', () => {
