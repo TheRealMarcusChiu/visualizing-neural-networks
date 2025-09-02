@@ -5,7 +5,6 @@
     <title>Three.js Real-time 3D Mesh + Points</title>
 
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/dropdown-multi.css">
     <link rel="stylesheet" href="css/editor.css">
     <link rel="stylesheet" href="css/main-visual-node-network.css">
 
@@ -48,13 +47,20 @@
         <button id="edit-canvas-target-gear" class="gear">⚙️</button>
 
         <div id="canvas-target-gear-popup">
-            <select id="dropdown-layer" style="display: none;"></select><label for="dropdown-layer"></label>
-            <select id="dropdown-node" style="display: none;"></select><label for="dropdown-node"></label>
-
-            <input type="checkbox" id="undo-activation"><label for="undo-activation">Undo Node Activation</label>
-            <input type="checkbox" id="undo-bias"><label for="undo-bias">Undo Node Bias</label>
-
-            <div class="controls">
+            <div style="display: none;">
+                <select id="dropdown-layer"></select><label for="dropdown-layer"></label>
+            </div>
+            <div style="display: none;">
+                <select id="dropdown-node"></select><label for="dropdown-node"></label>
+            </div>
+            <div>
+                <input type="checkbox" id="undo-activation"><label for="undo-activation">Undo Node Activation</label>
+            </div>
+            <div>
+                <input type="checkbox" id="undo-bias"><label for="undo-bias">Undo Node Bias</label>
+            </div>
+            <div>Undo Previous Node Inputs</div>
+            <div>
                 <button id="select-all-prev-nodes">Select All</button>
                 <button id="deselect-all-prev-nodes">Deselect All</button>
             </div>

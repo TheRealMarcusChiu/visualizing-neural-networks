@@ -319,6 +319,8 @@ checkboxUndoBias.addEventListener("change", function() {
 // START //
 ///////////
 
+const editCanvasTargetGearButton = document.getElementById("edit-canvas-target-gear");
+const editCanvasTargetGearPopup = document.getElementById("canvas-target-gear-popup");
 const dropdownListContainer = document.getElementById("dropdown-list-container");
 const selectAllBtn = document.getElementById("select-all-prev-nodes");
 const deselectAllBtn = document.getElementById("deselect-all-prev-nodes");
@@ -385,9 +387,24 @@ deselectAllBtn.addEventListener("click", (e) => {
     e.stopPropagation(); // Keep dropdown open
 });
 
-// Click outside closes dropdown
+
+function toggleEditCanvasTargetGearPopup() {
+    const computedDisplay = window.getComputedStyle(editCanvasTargetGearPopup).display;
+    if (computedDisplay === "none") {
+        editCanvasTargetGearPopup.style.display = "flex";  // show it
+        console.log(editCanvasTargetGearPopup.style.display);
+    } else {
+        editCanvasTargetGearPopup.style.display = "none";  // hide it
+    }
+}
+
+editCanvasTargetGearButton.addEventListener("click", (e) => {
+    toggleEditCanvasTargetGearPopup();
+});
+
+// Click outside closes editCanvasTargetGearPopup
 document.addEventListener("click", (e) => {
-    if (!dropdown.contains(e.target)) dropdownList.style.display = "none";
+    editCanvasTargetGearPopup.style.display = "none";
 });
 
 // Initial update
@@ -468,9 +485,13 @@ function view2D(manifests) {
         m.camera.position.set(0, 20, 0);
     });
 }
-document.getElementById('view-2D').addEventListener('click', () => {
-    view2D(manifests);
+['view-2D', 'edit-canvas-input-2d', 'edit-canvas-target-2d'].forEach(id => {
+    const elem = document.getElementById(id);
+    elem.addEventListener("click", () => {
+        view2D(manifests);
+    });
 });
+
 view2D(manifests);
 
 function mirrorCameraMovements(manifests) {

@@ -1,3 +1,6 @@
+body {
+    font-family: sans-serif;
+}
 #workspace {
     position: relative;     /* parent must be relative for absolute children */
 }
@@ -63,7 +66,7 @@
 
 #canvas-target-gear-popup {
     position: absolute;
-    top: -200px;
+    top: -165px;
     right: 10px;
 
     display: flex;
@@ -73,14 +76,17 @@
     padding: 10px;
     background: #f5f5f5;  /* just for clarity */
     border-radius: 6px;
+
+    width: 200px;
+
+    /* Scrollable */
+    max-height: 150px;      /* set the height you want */
+    overflow-y: auto;       /* vertical scroll if content exceeds height */
+    overflow-x: hidden;     /* hide horizontal scroll */
 }
 
-#canvas-target-gear-popup label,
 #canvas-target-gear-popup select,
-#canvas-target-gear-popup input,
-#canvas-target-gear-popup button,
-#canvas-target-gear-popup .controls,
-#canvas-target-gear-popup #dropdown-list-container {
+#canvas-target-gear-popup #dropdown-list-container label {
     display: block; /* each takes full line */
     margin: 2px 0;
 }
