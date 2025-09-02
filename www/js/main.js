@@ -1,4 +1,4 @@
-import { renderCanvasInput, renderCanvasOther } from './main-visual-3d-plots.js';
+import { renderCanvasInput, renderCanvasOther, canvasInputTrainingDataSet } from './main-visual-3d-plots.js';
 import { nodeNetworkBuild, nodeNetworkHighlightNodes } from './main-visual-node-network.js';
 
 
@@ -131,19 +131,25 @@ function loadNetAndTrainer() {
     });
 }
 function loadModel() {
+    // CovnetJS - Load Layers
     eval(editor.getValue());
     validateModel(layer_defs);
 
+    // show node-edge graph
     showTab("tab2-node-network");
     nodeNetworkBuild(layer_defs, setTarget);
     setTarget(targetLayerIndex, targetNodeIndex);
 
+    // update training iteration counter
     counter = 0;
     if (counterDiv !== undefined) {
         counterDiv.textContent = counter;
     }
 
+    // CovnetJS - Load Net & Trainer
     loadNetAndTrainer();
+
+    // target node
     updateDropdownLayerOptions(layer_defs);
 }
 function editModel() {
@@ -163,10 +169,20 @@ editLoadModelButton.addEventListener('click', () => {
 
 // Training Data
 const training_data = []; // array of { input: [], label: number 0 or 1 }
-function addTrainingData(x, z, label) {
+function trainingDataClear() {
+    training_data.length = 0;
+}
+function trainingDataSet(new_data) {
+    trainingDataClear();
+    new_data.forEach(({input, label}) => {
+        trainingDataAdd(input[0], input[1], label);
+    });
+    updateCanvasInputTrainingDataSet();
+}
+function trainingDataAdd(x, z, label) {
     training_data.push({ input: [x, z], label: label });
 }
-function generateTrainingDataCircle() {
+function trainingDataGenerateCircle() {
     const new_data = [];
 
     function helper(innerRadius, outerRadius, label) {
@@ -188,7 +204,7 @@ function generateTrainingDataCircle() {
 
     return new_data;
 }
-function generateTrainingDataRandom() {
+function trainingDataGenerateRandom() {
     const new_data = [];
 
     for (var i = 0; i < 50; i++) {
@@ -201,9 +217,20 @@ function generateTrainingDataRandom() {
     return new_data;
 }
 
-generateTrainingDataCircle().forEach(({input, label}) => {
-    addTrainingData(input[0], input[1], label);
+document.getElementById('training-data-generate-circle').addEventListener('click', () => {
+    trainingDataSet(trainingDataGenerateCircle());
 });
+document.getElementById('training-data-generate-random').addEventListener('click', () => {
+    trainingDataSet(trainingDataGenerateRandom());
+});
+document.getElementById('training-data-clear').addEventListener('click', () => {
+    trainingDataSet([]);
+});
+
+
+trainingDataSet(trainingDataGenerateCircle());
+
+
 
 // Allow Choosing Target (Layer & Node) Logic
 var targetLayerIndex = 1;
@@ -573,14 +600,22 @@ document.addEventListener('click', (e) => {
 // each manifest obj is { scene, camera, renderer, controls, planeMeshPosition, planeMeshSpheres, trainingDataSpheres }
 const manifests = [];
 
-const training_data_estimates = training_data.map(({input}) => {
-    var input_point = new convnetjs.Vol(1, 1, 2);
-    input_point.w[0] = input[0];
-    input_point.w[1] = input[1];
-    return net.forward(input_point).w[1];
-});
-const manifest_input = renderCanvasInput(document.getElementById('canvas-input'), training_data, training_data_estimates, addTrainingData);
+
+function updateCanvasInputTrainingDataSet() {
+    if (net === undefined) return;
+
+    const training_data_estimates = training_data.map(({input}) => {
+        var input_point = new convnetjs.Vol(1, 1, 2);
+        input_point.w[0] = input[0];
+        input_point.w[1] = input[1];
+        return net.forward(input_point).w[1];
+    });
+    canvasInputTrainingDataSet(training_data, training_data_estimates);
+}
+
+const manifest_input = renderCanvasInput(document.getElementById('canvas-input'), trainingDataAdd);
 manifests.push(manifest_input);
+updateCanvasInputTrainingDataSet();
 
 const manifest_target = renderCanvasOther(document.getElementById('canvas-target'));
 manifests.push(manifest_target);
