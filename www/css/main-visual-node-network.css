@@ -1,0 +1,43 @@
+#stage-container {
+    position: relative;     /* parent must be relative for absolute children */
+    overflow-x: auto;       /* horizontal scroll */
+    overflow-y: hidden;     /* optional */
+    white-space: nowrap;
+    font-family: sans-serif;
+    width: 100%;
+    height: 100%;
+    background: #1e1e1e;
+}
+#stage {
+  position: absolute;
+  display: block;
+  height: 100%;
+//  width: 100%;
+  background: #1e1e1e;
+}
+.node circle { fill:#1e1e1e; stroke:#ddd; stroke-width:2; cursor:pointer; }
+.node text { fill:#aaa; font-size:14px; pointer-events:none; }
+.edge { stroke-linecap:round; opacity:.9; cursor:pointer; }
+.edge-pos{ stroke:#999; }
+.edge-neg{ stroke:#999; }
+//        .edge-pos{ stroke:#45d175; }
+//        .edge-neg{ stroke:#ff6b6b; }
+.popup-input {
+  position:absolute; transform:translate(-50%,-50%);
+  padding:2px 4px; width:54px; font-size:11px;
+  border-radius:6px; border:1px solid #444;
+  background:#1b2434; color:#eee; text-align:center;
+  z-index:10;
+}
+.node-popup {
+  position:absolute; background:#1f2a3c; border:1px solid #555;
+  border-radius:8px; padding:10px; z-index:20;
+  box-shadow:0 4px 10px rgba(0,0,0,0.5);
+}
+.node-popup h4 { margin:0 0 8px; font-size:14px; }
+.node-popup button {
+  display:block; margin:4px 0; padding:4px 8px;
+  width:100%; background:#2b3b55; border:none;
+  border-radius:6px; color:#eee; cursor:pointer;
+}
+.node-popup button:hover { background:#3c5275; }

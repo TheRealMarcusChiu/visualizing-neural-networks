@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>JS Syntax Highlight from Raw Code</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+</head>
+<body>
+
+<label for="code">
+</label><textarea id="code">console.log("Hello World");</textarea>
+<script>
+    var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+      mode: "javascript",
+      theme: "monokai",
+      lineNumbers: false,
+      readOnly: true
+    });
+</script>
+
+</body>
+</html>

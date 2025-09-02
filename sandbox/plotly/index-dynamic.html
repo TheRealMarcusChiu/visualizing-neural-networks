@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real-time 3D Plotly Graph</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { margin:0; }
+        #plot { width:100vw; height:100vh; }
+    </style>
+</head>
+<body>
+<div id="plot"></div>
+
+<script>
+    // Initial data
+    let trace = {
+      x: [0],
+      y: [0],
+      z: [0],
+      mode: 'markers',
+      type: 'scatter3d',
+      marker: { size: 5, color: 'red' }
+    };
+
+    let layout = {
+      margin: { l:0, r:0, b:0, t:0 },
+      scene: {
+        xaxis: { range: [-10, 10] },
+        yaxis: { range: [-10, 10] },
+        zaxis: { range: [-10, 10] }
+      }
+    };
+
+    Plotly.newPlot('plot', [trace], layout);
+
+    // Function to generate new random points
+    function getRandomPoint() {
+      return [
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20
+      ];
+    }
+
+    // Update in real-time
+    setInterval(() => {
+      let [x, y, z] = getRandomPoint();
+
+      Plotly.extendTraces('plot',
+        { x: [[x]], y: [[y]], z: [[z]] },
+        [0]
+      );
+
+      // Keep only the last 100 points
+      let maxPoints = 100;
+      Plotly.relayout('plot', {
+        'scene.xaxis.range': [-10, 10],
+        'scene.yaxis.range': [-10, 10],
+        'scene.zaxis.range': [-10, 10]
+      });
+
+    }, 500); // update every 500ms
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Three.js Real-time 3D Mesh + Points</title>
+    <script src="lib/covnet.min.js" defer></script>
+    <script src="main.js" type="module" defer></script>
+</head>
+<body>
+    <div>
+        <textarea id="layerdef" style="width:100%; height:200px;">
+layer_defs = [
+    {type:'input', out_sx:1, out_sy:1, out_depth:2},
+    {type:'fc', num_neurons:3, activation:'relu'},
+    {type:'softmax', num_classes:2}
+];
+net = new convnetjs.Net();
+net.makeLayers(layer_defs);
+trainer = new convnetjs.SGDTrainer(net, {learning_rate:0.01, momentum:0.1, batch_size:10, l2_decay:0.001});
+        </textarea>
+        <button id="load-model">Load Model</button>
+    </div>
+    <div>
+        <button id="toggle-training">Start Training</button>
+        <button id="view-2D">Reset View</button>
+<!--        <button id="view-3D">View 3D</button>-->
+<!--        <button id="toggle-mirror-camera-movements">Mirror Camera Movements</button>-->
+        <button id="log-layers">Console Log Layers</button>
+    </div>
+    <div>
+        <canvas id="canvas-input" width="350" height="350"></canvas>
+    </div>
+    <div>
+        <canvas id="canvas01" width="350" height="350"></canvas>
+        <canvas id="canvas02" width="350" height="350"></canvas>
+        <canvas id="canvas03" width="350" height="350"></canvas>
+    </div>
+    <div>
+        <canvas id="canvas11" width="175" height="175"></canvas>
+        <canvas id="canvas12" width="175" height="175"></canvas>
+        <canvas id="canvas13" width="175" height="175"></canvas>
+        <canvas id="canvas14" width="175" height="175"></canvas>
+        <canvas id="canvas15" width="175" height="175"></canvas>
+        <canvas id="canvas16" width="175" height="175"></canvas>
+    </div>
+    <div>
+        <canvas id="canvas21" width="525" height="525"></canvas>
+        <canvas id="canvas22" width="525" height="525"></canvas>
+    </div>
+</body>
+</html>

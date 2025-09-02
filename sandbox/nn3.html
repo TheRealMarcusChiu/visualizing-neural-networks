@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Neural Network SVG Visualizer</title>
+    <style>
+        body {
+          margin: 0;
+          height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background: linear-gradient(135deg, #1a1a2e, #16213e);
+          font-family: Arial, sans-serif;
+          color: #fff;
+        }
+
+        .glass-container {
+          backdrop-filter: blur(10px);
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 20px;
+          padding: 20px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 15px;
+        }
+
+        svg {
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.05);
+          cursor: pointer;
+        }
+
+        .edge {
+          stroke: rgba(255,255,255,0.2);
+          stroke-width: 1.2;
+          transition: stroke 0.2s, stroke-width 0.2s;
+        }
+
+        .weight {
+          fill: rgba(0,255,255,0.2);
+          font-size: 12px;
+          text-anchor: middle;
+          pointer-events: auto;
+          cursor: pointer;
+          transition: fill 0.2s;
+        }
+
+        .highlight-edge {
+          stroke: #0ff !important;
+          stroke-width: 3 !important;
+        }
+
+        .highlight-weight {
+          fill: #0ff !important;
+          font-weight: bold;
+        }
+
+        .svg-input {
+          position: absolute;
+          background: rgba(0,0,0,0.8);
+          color: #0ff;
+          border: 1px solid #0ff;
+          border-radius: 4px;
+          width: 40px;
+          text-align: center;
+          font-size: 12px;
+          padding: 2px;
+        }
+    </style>
+</head>
+<body>
+<div class="glass-container">
+    <svg id="nnSVG" width="600" height="400"></svg>
+</div>
+
+<script>
+    const svg = document.getElementById('nnSVG');
+
+    const network = {
+      layers: [
+        { nodes: [ {bias: 0}, {bias: 0} ] },
+        { nodes: [ {bias: 0.5}, {bias: -0.3} ] },
+        { nodes: [ {bias: 0.2} ] }
+      ],
+      weights: [
+        [ [0.8, -0.5], [0.2, 0.9] ],
+        [ [1.0], [-1.2] ]
+      ]
+    };
+
+    function drawNetwork() {
+      svg.innerHTML = "";
+      const layerGap = svg.clientWidth / (network.layers.length + 1);
+      const nodeRadius = 20;
+
+      network.weights.forEach((layerWeights, i) => {
+        layerWeights.forEach((weights, j) => {
+          weights.forEach((w, k) => {
+            const fromX = (i + 1) * layerGap;
+            const fromY = (j + 1) * (svg.clientHeight / (network.layers[i].nodes.length + 1));
+            const toX = (i + 2) * layerGap;
+            const toY = (k + 1) * (svg.clientHeight / (network.layers[i+1].nodes.length + 1));
+
+            // Edge line
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", fromX);
+            line.setAttribute("y1", fromY);
+            line.setAttribute("x2", toX);
+            line.setAttribute("y2", toY);
+            line.classList.add("edge");
+            line.dataset.from = `${i},${j}`;
+            line.dataset.to = `${i+1},${k}`;
+            svg.appendChild(line);
+
+            // Weight text
+            const weightText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            weightText.setAttribute("x", (fromX+toX)/2);
+            weightText.setAttribute("y", (fromY+toY)/2);
+            weightText.classList.add("weight");
+            weightText.textContent = w.toFixed(2);
+            weightText.dataset.layer = i;
+            weightText.dataset.fromNode = j;
+            weightText.dataset.toNode = k;
+
+            // Click to edit weight
+            weightText.addEventListener("click", (e) => {
+              e.stopPropagation(); // prevent node click highlight
+              showInlineInput(weightText);
+            });
+
+            svg.appendChild(weightText);
+          });
+        });
+      });
+
+      // Nodes
+      network.layers.forEach((layer, i) => {
+        const nodeGap = svg.clientHeight / (layer.nodes.length + 1);
+        layer.nodes.forEach((node, j) => {
+          const x = (i + 1) * layerGap;
+          const y = (j + 1) * nodeGap;
+
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", x);
+          circle.setAttribute("cy", y);
+          circle.setAttribute("r", nodeRadius);
+          circle.setAttribute("fill", "rgba(255,255,255,0.2)");
+          circle.setAttribute("stroke", "white");
+          circle.dataset.layer = i;
+          circle.dataset.index = j;
+          circle.addEventListener("click", () => highlightNode(i, j));
+          svg.appendChild(circle);
+
+          if (i > 0) {
+            const biasText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            biasText.setAttribute("x", x);
+            biasText.setAttribute("y", y + 35);
+            biasText.setAttribute("fill", "#fff");
+            biasText.setAttribute("font-size", "12");
+            biasText.setAttribute("text-anchor", "middle");
+            biasText.textContent = `b=${node.bias.toFixed(2)}`;
+            svg.appendChild(biasText);
+          }
+        });
+      });
+    }
+
+    function highlightNode(layerIdx, nodeIdx) {
+      const lines = svg.querySelectorAll(".edge");
+      const weights = svg.querySelectorAll(".weight");
+
+      // Reset all to dimmed
+      lines.forEach(line => line.classList.remove("highlight-edge"));
+      weights.forEach(w => w.classList.remove("highlight-weight"));
+
+      // Highlight connected
+      lines.forEach(line => {
+        if (line.dataset.from === `${layerIdx},${nodeIdx}` ||
+            line.dataset.to === `${layerIdx},${nodeIdx}`) {
+          line.classList.add("highlight-edge");
+        }
+      });
+
+      weights.forEach(w => {
+        const l = parseInt(w.dataset.layer);
+        const fromNode = parseInt(w.dataset.fromNode);
+        const toNode = parseInt(w.dataset.toNode);
+
+        if ((layerIdx === l && nodeIdx === fromNode) ||
+            (layerIdx === l+1 && nodeIdx === toNode)) {
+          w.classList.add("highlight-weight");
+        }
+      });
+    }
+
+    function showInlineInput(textEl) {
+      const bbox = textEl.getBoundingClientRect();
+      const svgBbox = svg.getBoundingClientRect();
+
+      const input = document.createElement("input");
+      input.type = "number";
+      input.step = "0.1";
+      input.value = parseFloat(textEl.textContent);
+      input.className = "svg-input";
+      input.style.left = (bbox.left - svgBbox.left) + "px";
+      input.style.top = (bbox.top - svgBbox.top) + "px";
+
+      svg.parentElement.appendChild(input);
+      input.focus();
+
+      input.addEventListener("blur", () => {
+        const newVal = parseFloat(input.value);
+        if (!isNaN(newVal)) {
+          const l = parseInt(textEl.dataset.layer);
+          const from = parseInt(textEl.dataset.fromNode);
+          const to = parseInt(textEl.dataset.toNode);
+          network.weights[l][from][to] = newVal;
+          drawNetwork();
+          highlightNode(l, from); // keep highlight after edit
+        }
+        input.remove();
+      });
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") input.blur();
+      });
+    }
+
+    drawNetwork();
+</script>
+</body>
+</html>

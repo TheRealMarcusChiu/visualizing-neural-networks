@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>2D / 3D Toggle</title>
+    <style>
+        .toggle-container {
+          display: inline-block;
+          position: relative;
+          width: 80px;
+          height: 40px;
+          background: #222;
+          border-radius: 20px;
+          cursor: pointer;
+          overflow: hidden;
+          font-family: sans-serif;
+          user-select: none;
+        }
+
+        .toggle-container input {
+          display: none; /* hide checkbox */
+        }
+
+        .toggle-label {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 200%; /* double width to hold 2D + 3D side */
+          height: 100%;
+          display: flex;
+          transition: transform 0.3s ease;
+        }
+
+        .toggle-label span {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          color: white;
+        }
+
+        .toggle-label span:first-child {
+          background: linear-gradient(145deg, #555, #333);
+        }
+
+        .toggle-label span:last-child {
+          background: linear-gradient(145deg, #0a74da, #094a9f);
+        }
+
+        /* move slider when checked */
+        .toggle-container input:checked + .toggle-label {
+          transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body>
+<label class="toggle-container">
+    <input type="checkbox" id="dimension-toggle">
+    <div class="toggle-label">
+        <span>2D</span>
+        <span>3D</span>
+    </div>
+</label>
+</body>
+</html>

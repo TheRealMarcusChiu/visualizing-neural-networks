@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Neural Network SVG</title>
+    <style>
+        body {
+          background: rgba(20,20,30,0.9);
+          font-family: Arial, sans-serif;
+          color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+        svg {
+          backdrop-filter: blur(10px);
+          background: rgba(255,255,255,0.05);
+          border-radius: 20px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        .edge {
+          stroke: rgba(200,200,200,0.2);
+          stroke-width: 2;
+        }
+        .edge.highlight {
+          stroke: #00f0ff;
+          stroke-width: 3;
+        }
+        .weight {
+          font-size: 12px;
+          fill: rgba(255,255,255,0.4);
+          pointer-events: none;
+        }
+        .weight.highlight {
+          fill: #00f0ff;
+          font-weight: bold;
+          pointer-events: auto;
+        }
+        .bias {
+          font-size: 12px;
+          fill: rgba(255,255,255,0.7);
+        }
+        circle {
+          fill: rgba(255,255,255,0.1);
+          stroke: white;
+          stroke-width: 2;
+          cursor: pointer;
+        }
+        circle.highlight {
+          stroke: #00f0ff;
+          stroke-width: 3;
+        }
+        foreignObject input {
+          font-size: 12px;
+          width: 30px;
+          background: rgba(0,0,0,0.6);
+          color: white;
+          border: none;
+          border-radius: 4px;
+          text-align: center;
+        }
+    </style>
+</head>
+<body>
+<svg id="network" width="600" height="400"></svg>
+
+<script>
+    const svg = document.getElementById("network");
+
+    const layers = [
+      { x: 100, y: [100, 200, 300] },
+      { x: 300, y: [150, 250] },
+      { x: 500, y: [200] }
+    ];
+
+    let edges = [];
+    let nodes = [];
+
+    const edgeLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const nodeLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    svg.appendChild(edgeLayer);
+    svg.appendChild(nodeLayer);
+
+    // Draw nodes + biases
+    layers.forEach((layer, layerIndex) => {
+      layer.y.forEach((y, nodeIndex) => {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", layer.x);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", 20);
+
+        const bias = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        bias.setAttribute("x", layer.x);
+        bias.setAttribute("y", y + 5);
+        bias.setAttribute("text-anchor", "middle");
+        bias.classList.add("bias");
+        bias.textContent = "b=0.1";
+
+        nodeLayer.appendChild(circle);
+        nodeLayer.appendChild(bias);
+
+        nodes.push({ circle, bias, layerIndex, nodeIndex });
+      });
+    });
+
+    // Draw edges + weights
+    layers.forEach((layer, i) => {
+      if (i < layers.length - 1) {
+        layer.y.forEach((y, j) => {
+          layers[i + 1].y.forEach((y2, k) => {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", layer.x);
+            line.setAttribute("y1", y);
+            line.setAttribute("x2", layers[i+1].x);
+            line.setAttribute("y2", y2);
+            line.classList.add("edge");
+
+            const weight = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            weight.setAttribute("x", (layer.x + layers[i+1].x) / 2);
+            weight.setAttribute("y", (y + y2) / 2 - 5);
+            weight.setAttribute("text-anchor", "middle");
+            weight.classList.add("weight");
+            weight.textContent = "w=0.5";
+
+            edgeLayer.appendChild(line);
+            edgeLayer.appendChild(weight);
+
+            edges.push({ line, weight, from: {layer: i, node: j}, to: {layer: i+1, node: k} });
+          });
+        });
+      }
+    });
+
+    // Highlight + edit functions
+    function clearHighlights() {
+      nodes.forEach(n => n.circle.classList.remove("highlight"));
+      edges.forEach(e => {
+        e.line.classList.remove("highlight");
+        e.weight.classList.remove("highlight");
+      });
+      [...svg.querySelectorAll("foreignObject")].forEach(e => e.remove());
+    }
+
+    function editText(textElement) {
+      const [x, y] = [parseFloat(textElement.getAttribute("x")), parseFloat(textElement.getAttribute("y"))];
+      const fo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
+      fo.setAttribute("x", x - 15);
+      fo.setAttribute("y", y - 10);
+      fo.setAttribute("width", 40);
+      fo.setAttribute("height", 20);
+
+      const input = document.createElement("input");
+      input.value = textElement.textContent.split("=")[1];
+      input.onblur = () => {
+        textElement.textContent = textElement.textContent[0] + "=" + input.value;
+        fo.remove();
+      };
+      input.onkeydown = e => { if (e.key === "Enter") input.blur(); };
+
+      fo.appendChild(input);
+      svg.appendChild(fo);
+      input.focus();
+    }
+
+    // Node click → highlight connected edges + weights
+    nodes.forEach((n, idx) => {
+      n.circle.addEventListener("click", () => {
+        clearHighlights();
+        n.circle.classList.add("highlight");
+        edges.forEach(e => {
+          if ((e.from.layer === n.layerIndex && e.from.node === n.nodeIndex) ||
+              (e.to.layer === n.layerIndex && e.to.node === n.nodeIndex)) {
+            e.line.classList.add("highlight");
+            e.weight.classList.add("highlight");
+          }
+        });
+      });
+      n.bias.addEventListener("click", () => {
+        editText(n.bias);
+      });
+    });
+
+    // Edge click → highlight only that edge + weight
+    edges.forEach(e => {
+      e.line.addEventListener("click", ev => {
+        ev.stopPropagation();
+        clearHighlights();
+        e.line.classList.add("highlight");
+        e.weight.classList.add("highlight");
+      });
+      e.weight.addEventListener("click", ev => {
+        ev.stopPropagation();
+        editText(e.weight);
+      });
+    });
+
+    // Click background to clear highlights
+    svg.addEventListener("click", e => {
+      if (e.target === svg) clearHighlights();
+    });
+</script>
+</body>
+</html>

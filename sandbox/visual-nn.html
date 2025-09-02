@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Neural Net Visualizer (Dynamic Layers + Editable Weights)</title>
+    <style>
+        :root{
+          --bg: #0b1020;
+          --panel: rgba(255,255,255,0.06);
+          --panel-2: rgba(255,255,255,0.10);
+          --accent: #8dd9ff;
+          --text: #e8ecf1;
+          --muted: #a7b0bf;
+          --pos: #45d175;
+          --neg: #ff6b6b;
+        }
+        *{box-sizing:border-box}
+        body{
+          margin:0;
+          background:
+            radial-gradient(1200px 800px at 10% -10%, #192a56 0%, rgba(25,42,86,0) 60%),
+            radial-gradient(1000px 600px at 120% 20%, #0a3d62 0%, rgba(10,61,98,0) 60%),
+            var(--bg);
+          color:var(--text);
+          font: 16px/1.4 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+        header{
+          padding:20px 24px;
+          display:flex;
+          gap:16px;
+          align-items:center;
+          justify-content:space-between;
+        }
+        .title{
+          font-size:20px;
+          font-weight:700;
+          letter-spacing:.2px;
+          display:flex; gap:10px; align-items:center;
+        }
+        .badge{
+          font-size:12px; padding:4px 8px; border-radius:999px;
+          background:linear-gradient(180deg,var(--panel-2),transparent);
+          border:1px solid rgba(255,255,255,0.15);
+          color:var(--muted);
+        }
+        .controls{
+          display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+        }
+        .card{
+          background:linear-gradient(180deg,var(--panel), rgba(255,255,255,0.02));
+          border:1px solid rgba(255,255,255,0.12);
+          border-radius:16px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
+          backdrop-filter: blur(10px);
+        }
+        .pane{
+          margin: 0 24px 18px;
+          padding:14px;
+        }
+        .row{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+        textarea, input[type="text"], button, .small{
+          font: inherit; color: var(--text);
+        }
+        textarea{
+          width: 520px; max-width: 100%; min-height: 90px; padding:12px 12px;
+          border-radius:12px; border:1px solid rgba(255,255,255,0.12);
+          background: rgba(0,0,0,0.25);
+          outline: none;
+        }
+        textarea:focus{ border-color: var(--accent); box-shadow: 0 0 0 3px rgba(141,217,255,0.15); }
+        button{
+          padding:10px 14px; border:1px solid rgba(255,255,255,0.16);
+          background: linear-gradient(180deg, rgba(141,217,255,0.22), rgba(141,217,255,0.06));
+          color: #0c1824; border-radius:12px; cursor:pointer; font-weight:700;
+        }
+        button.secondary{
+          background: transparent; color: var(--text);
+        }
+        .small{ color: var(--muted); font-size: 12px; }
+        .legend{ display:flex; gap:10px; align-items:center; color: var(--muted); font-size:13px; }
+        .swatch{ width:14px; height:14px; border-radius:3px; }
+        .swatch.pos{ background: var(--pos); }
+        .swatch.neg{ background: var(--neg); }
+
+        /* Stage (SVG) */
+        .stage-wrap{ margin: 0 24px 24px; }
+        #stage{
+          width:100%;
+          height: 560px;
+          display:block;
+          border-radius:16px;
+          border:1px solid rgba(255,255,255,0.10);
+          background: linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.015));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        /* Node styling */
+        .node{
+          cursor:pointer;
+          filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
+        }
+        .node circle{
+          fill: #0e1b2a;
+          stroke: rgba(255,255,255,0.45);
+          stroke-width:1.2;
+        }
+        .node text{
+          fill: var(--muted);
+          font-size: 12px;
+          pointer-events:none;
+        }
+
+        /* Edge styling */
+        .edge{
+          stroke-linecap: round;
+          transition: stroke 120ms ease, stroke-width 120ms ease, opacity 120ms ease;
+          opacity: 0.9;
+        }
+        .edge-pos{ stroke: var(--pos); }
+        .edge-neg{ stroke: var(--neg); }
+
+        /* Weight input overlays */
+        .weight-input{
+          position:absolute;
+          width:64px;
+          transform: translate(-50%, -50%);
+          padding: 4px 6px;
+          border-radius:8px;
+          border:1px solid rgba(255,255,255,0.18);
+          background: rgba(10,15,25,0.75);
+          color: var(--text);
+          text-align:center;
+          font-size: 12px;
+          outline: none;
+          box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+        }
+        .weight-input:focus{
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(141,217,255,0.18);
+        }
+
+        /* Footer */
+        footer{ padding: 12px 24px 24px; color: var(--muted); font-size: 12px; }
+        a { color: #9ddcff; text-decoration: none; }
+    </style>
+</head>
+<body>
+<header>
+    <div class="title">
+        <span>🧠 Neural Net Visualizer</span>
+        <span class="badge">Dynamic Layers • Editable Weights</span>
+    </div>
+    <div class="legend">
+        <div class="swatch pos"></div> positive weight
+        <div class="swatch neg" style="margin-left:8px;"></div> negative weight
+    </div>
+</header>
+
+<div class="pane card">
+    <div class="row">
+        <textarea id="layerDefsInput" spellcheck="false" aria-label="Layer definition JSON"></textarea>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <button id="rebuildBtn" title="Rebuild network from the JSON">Rebuild Network</button>
+            <button id="randomizeBtn" class="secondary" title="Randomize all weights">Randomize Weights</button>
+            <div class="small">Tip: click any node to see its <strong>layer index</strong> and <strong>node index</strong>.<br/>Edit edge weights directly in the small inputs.</div>
+        </div>
+    </div>
+</div>
+
+<div class="stage-wrap card" style="position:relative;">
+    <svg id="stage" viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid meet" aria-label="Neural network diagram"></svg>
+    <!-- Weight inputs will be positioned absolutely inside this wrapper -->
+</div>
+
+<footer>
+    Layers are generated from <code>layer_defs</code>. Supported types here: <code>input</code>, <code>fc</code>, <code>softmax</code>.
+</footer>
+
+<script>
+    /** -------- Layer defs (editable) -------- **/
+    const defaultLayerDefs = [
+      {type: 'input',  out_sx: 1, out_sy: 1, out_depth: 2}, // 2 inputs
+      {type: 'fc',     num_neurons: 6, activation: 'relu'},
+      {type: 'fc',     num_neurons: 5, activation: 'relu'},
+      {type: 'fc',     num_neurons: 4, activation: 'relu'},
+      {type: 'softmax',num_classes: 2} // 2 outputs
+    ];
+
+    // Insert pretty JSON into the textarea
+    const layerDefsInput = document.getElementById('layerDefsInput');
+    layerDefsInput.value = JSON.stringify(defaultLayerDefs, null, 2);
+
+    // Stage elements
+    const stage = document.getElementById('stage');
+    const stageWrap = document.querySelector('.stage-wrap');
+
+    // Layout constants
+    const PADDING_X = 120;
+    const PADDING_Y = 60;
+    const LAYER_GAP = 180;
+    const NODE_RADIUS = 16;
+
+    // Model state
+    let layers = [];       // [{count, type}]
+    let nodes = [];        // nodes[layerIndex] = [{x,y}]
+    let weights = [];      // weights[layerIndex][i_from][j_to] for edges between layer L and L+1
+    let weightInputs = []; // references to HTML inputs to clean up on rebuild
+
+    /** -------- Utils -------- **/
+    function parseLayerDefs(jsonStr){
+      try{
+        const arr = JSON.parse(jsonStr);
+        if(!Array.isArray(arr)) throw new Error('layer_defs must be an array');
+        return arr;
+      }catch(e){
+        alert("Invalid JSON for layer_defs:\n" + e.message);
+        throw e;
+      }
+    }
+    function deriveLayerCounts(defs){
+      const out = [];
+      for(const d of defs){
+        if(d.type === 'input'){
+          out.push({ type:'input', count: (d.out_depth ?? 1) * (d.out_sx ?? 1) * (d.out_sy ?? 1) });
+        }else if(d.type === 'fc'){
+          out.push({ type:'fc', count: d.num_neurons });
+        }else if(d.type === 'softmax'){
+          out.push({ type:'softmax', count: d.num_classes });
+        }else{
+          throw new Error('Unsupported layer type: ' + d.type);
+        }
+      }
+      return out;
+    }
+    function randomWeight(){
+      // Biased small random weights
+      return +( (Math.random() * 2 - 1) * 0.8 ).toFixed(3);
+    }
+    function weightToStyle(w){
+      // color and thickness from weight
+      const abs = Math.min(Math.abs(w), 2.0);
+      const width = 1.2 + abs * 2.4; // 1.2..~6
+      const cls = (w >= 0) ? 'edge edge-pos' : 'edge edge-neg';
+      return {width, cls};
+    }
+    function clearStage(){
+      stage.innerHTML = '';
+      // Remove prior weight inputs
+      for(const el of weightInputs){
+        el.remove();
+      }
+      weightInputs = [];
+    }
+    function addSVG(tag, attrs={}){
+      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      for(const [k,v] of Object.entries(attrs)){
+        el.setAttribute(k, v);
+      }
+      stage.appendChild(el);
+      return el;
+    }
+
+    /** -------- Build network -------- **/
+    function buildNetwork(defs){
+      clearStage();
+
+      // 1) Layers -> counts
+      layers = deriveLayerCounts(defs);
+
+      // 2) Compute layout sizes
+      const W = stage.viewBox.baseVal.width || 1200;
+      const H = stage.viewBox.baseVal.height || 560;
+
+      // Horizontal distribution
+      const L = layers.length;
+      const layerX = (idx) => PADDING_X + idx * LAYER_GAP;
+
+      // 3) Compute node positions
+      nodes = layers.map((layer, li) => {
+        const count = layer.count;
+        const usableH = H - PADDING_Y*2;
+        const gap = (count > 1) ? usableH / (count - 1) : 0;
+        const x = layerX(li);
+        const arr = [];
+        for(let i=0;i<count;i++){
+          const y = (count === 1) ? (H/2) : (PADDING_Y + i*gap);
+          arr.push({x, y});
+        }
+        return arr;
+      });
+
+      // 4) Init weights (between layer l and l+1)
+      weights = [];
+      for(let l=0; l<L-1; l++){
+        const from = nodes[l].length;
+        const to   = nodes[l+1].length;
+        const mat = Array.from({length: from}, () =>
+          Array.from({length: to}, () => randomWeight())
+        );
+        weights.push(mat);
+      }
+
+      // 5) Draw edges + weight inputs
+      drawEdgesAndWeights();
+
+      // 6) Draw nodes on top
+      drawNodes();
+
+      // 7) Draw layer labels
+      drawLabels(defs);
+    }
+
+    function drawNodes(){
+      nodes.forEach((layerNodes, lIdx) => {
+        layerNodes.forEach((pt, nIdx) => {
+          const g = addSVG('g', { class: 'node', 'data-layer': lIdx, 'data-node': nIdx });
+          const c = addSVG('circle', { cx: pt.x, cy: pt.y, r: NODE_RADIUS });
+          const t = addSVG('text', { x: pt.x, y: pt.y+4, 'text-anchor':'middle' });
+          t.textContent = nIdx; // index label inside node
+          g.appendChild(c); g.appendChild(t);
+
+          // Click to alert layer/node
+          g.addEventListener('click', () => {
+            alert(`Layer ${lIdx} • Node ${nIdx}`);
+          });
+        });
+      });
+    }
+
+    function drawEdgesAndWeights(){
+      const bbox = stage.getBoundingClientRect();
+      const wrapBox = stageWrap.getBoundingClientRect();
+
+      for(let l=0; l<weights.length; l++){
+        const fromNodes = nodes[l];
+        const toNodes   = nodes[l+1];
+
+        for(let i=0;i<fromNodes.length;i++){
+          for(let j=0;j<toNodes.length;j++){
+            const w = weights[l][i][j];
+            const {width, cls} = weightToStyle(w);
+
+            // Edge line
+            const line = addSVG('line', {
+              x1: fromNodes[i].x + NODE_RADIUS + 4,
+              y1: fromNodes[i].y,
+              x2: toNodes[j].x - NODE_RADIUS - 4,
+              y2: toNodes[j].y,
+              'stroke-width': width,
+              class: cls,
+              'data-l': l, 'data-i': i, 'data-j': j
+            });
+
+            // Compute midpoint in SVG coords
+            const mx = (parseFloat(line.getAttribute('x1')) + parseFloat(line.getAttribute('x2'))) / 2;
+            const my = (parseFloat(line.getAttribute('y1')) + parseFloat(line.getAttribute('y2'))) / 2;
+
+            // Convert SVG coords to absolute px within wrapper for positioning inputs
+            // Using viewBox scaling to figure out relative position:
+            const vb = stage.viewBox.baseVal; // {x,y,width,height}
+            const px = ( (mx - vb.x) / vb.width ) * bbox.width + (bbox.left - wrapBox.left);
+            const py = ( (my - vb.y) / vb.height) * bbox.height + (bbox.top  - wrapBox.top);
+
+            // Create weight input overlay
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.className = 'weight-input';
+            inp.value = w;
+            inp.setAttribute('data-l', l);
+            inp.setAttribute('data-i', i);
+            inp.setAttribute('data-j', j);
+            inp.style.left = px + 'px';
+            inp.style.top  = py + 'px';
+
+            // Update handler
+            inp.addEventListener('input', (e) => {
+              const val = parseFloat(e.target.value);
+              const L = +e.target.getAttribute('data-l');
+              const I = +e.target.getAttribute('data-i');
+              const J = +e.target.getAttribute('data-j');
+              if(!isNaN(val)){
+                weights[L][I][J] = val;
+                // find the corresponding line and restyle
+                const selector = `line[data-l="${L}"][data-i="${I}"][data-j="${J}"]`;
+                const edge = stage.querySelector(selector);
+                if(edge){
+                  const {width, cls} = weightToStyle(val);
+                  edge.setAttribute('stroke-width', width);
+                  edge.setAttribute('class', cls);
+                  edge.setAttribute('opacity', 1);
+                }
+              }
+            });
+
+            stageWrap.appendChild(inp);
+            weightInputs.push(inp);
+          }
+        }
+      }
+    }
+
+    function drawLabels(defs){
+      const Y = 28;
+      defs.forEach((def, li) => {
+        const x = nodes[li]?.[0]?.x ?? (120 + li*LAYER_GAP);
+        const label = `${def.type}${def.activation ? ' ('+def.activation+')':''}`;
+        const tx = addSVG('text', { x, y: Y, 'text-anchor':'middle' });
+        tx.textContent = label;
+        tx.setAttribute('fill', '#c9d4e6');
+        tx.setAttribute('font-size', '13');
+      });
+    }
+
+    /** -------- Controls -------- **/
+    document.getElementById('rebuildBtn').addEventListener('click', () => {
+      try{
+        const defs = parseLayerDefs(layerDefsInput.value);
+        buildNetwork(defs);
+      }catch(_){}
+    });
+
+    document.getElementById('randomizeBtn').addEventListener('click', () => {
+      // Randomize all weights and refresh inputs/edges styling
+      for(let l=0;l<weights.length;l++){
+        for(let i=0;i<weights[l].length;i++){
+          for(let j=0;j<weights[l][i].length;j++){
+            weights[l][i][j] = randomWeight();
+          }
+        }
+      }
+      // Update inputs + edges
+      for(const inp of weightInputs){
+        const L = +inp.getAttribute('data-l');
+        const I = +inp.getAttribute('data-i');
+        const J = +inp.getAttribute('data-j');
+        const val = weights[L][I][J];
+        inp.value = val;
+        const edge = stage.querySelector(`line[data-l="${L}"][data-i="${I}"][data-j="${J}"]`);
+        if(edge){
+          const {width, cls} = weightToStyle(val);
+          edge.setAttribute('stroke-width', width);
+          edge.setAttribute('class', cls);
+          edge.setAttribute('opacity', 1);
+        }
+      }
+    });
+
+    // Keep weight inputs aligned on resize
+    window.addEventListener('resize', () => {
+      // Reposition all weight inputs based on current SVG bbox
+      const bbox = stage.getBoundingClientRect();
+      const wrapBox = stageWrap.getBoundingClientRect();
+      const vb = stage.viewBox.baseVal;
+
+      for(const inp of weightInputs){
+        const L = +inp.getAttribute('data-l');
+        const I = +inp.getAttribute('data-i');
+        const J = +inp.getAttribute('data-j');
+        const line = stage.querySelector(`line[data-l="${L}"][data-i="${I}"][data-j="${J}"]`);
+        if(!line) continue;
+        const mx = (parseFloat(line.getAttribute('x1')) + parseFloat(line.getAttribute('x2'))) / 2;
+        const my = (parseFloat(line.getAttribute('y1')) + parseFloat(line.getAttribute('y2'))) / 2;
+        const px = ( (mx - vb.x) / vb.width ) * bbox.width + (bbox.left - wrapBox.left);
+        const py = ( (my - vb.y) / vb.height) * bbox.height + (bbox.top  - wrapBox.top);
+        inp.style.left = px + 'px';
+        inp.style.top  = py + 'px';
+      }
+    }, {passive:true});
+
+    /** -------- Kick off with defaults -------- **/
+    buildNetwork(defaultLayerDefs);
+</script>
+</body>
+</html>

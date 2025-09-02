@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Monaco Editor Example</title>
+    <style>
+        body {
+          margin: 0;
+          padding: 0;
+          font-family: sans-serif;
+          background-color: #1e1e1e;
+        }
+        #editor {
+          width: 100%;
+          height: 500px;
+          border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="color:white; text-align:center;">Monaco Editor - Dark Theme, JS, Dynamic</h2>
+<div id="editor"></div>
+
+<!-- Monaco Editor Loader -->
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs/loader.js"></script>
+<script>
+    require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+
+      // Create editor
+      const editor = monaco.editor.create(document.getElementById('editor'), {
+        value: `// Type JavaScript code here
+  function greet(name) {
+    console.log("Hello, " + name + "!");
+  }
+
+  greet('Alice');`,
+        language: 'javascript',
+        theme: 'vs-dark',
+        lineNumbers: 'off',     // no line numbers
+        minimap: { enabled: false } // hide minimap
+      });
+
+      // Listen for changes
+      editor.onDidChangeModelContent(() => {
+        const code = editor.getValue();
+        console.clear();
+        console.log('Current code:', code);
+      });
+
+      // Optional: handle resizing
+      window.addEventListener('resize', () => editor.layout());
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tab Switch Example</title>
+    <style>
+        body {
+          font-family: sans-serif;
+          background: #111;
+          color: #eee;
+          padding: 20px;
+        }
+        .tabs {
+          margin-bottom: 10px;
+        }
+        .tabs button {
+          background: #444;
+          color: white;
+          border: none;
+          padding: 8px 12px;
+          margin-right: 5px;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+        .tabs button.active {
+          background: #0077ff;
+        }
+        .tab-content {
+          display: none;
+          padding: 15px;
+          background: #222;
+          border-radius: 6px;
+        }
+        .tab-content.active {
+          display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="tabs">
+    <button onclick="showTab('tab1')">Tab 1</button>
+    <button onclick="showTab('tab2')">Tab 2</button>
+    <button onclick="showTab('tab3')">Tab 3</button>
+</div>
+
+<div id="tab1" class="tab-content active">
+    <h3>Tab 1 Content</h3>
+    <p>This is the first tab.</p>
+</div>
+<div id="tab2" class="tab-content">
+    <h3>Tab 2 Content</h3>
+    <p>This is the second tab.</p>
+</div>
+<div id="tab3" class="tab-content">
+    <h3>Tab 3 Content</h3>
+    <p>This is the third tab.</p>
+</div>
+
+<script>
+    function showTab(tabId) {
+      // Hide all tab content
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Remove active state from all buttons
+      document.querySelectorAll('.tabs button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(tabId).classList.add('active');
+
+      // Mark clicked button active
+      event.target.classList.add('active');
+    }
+</script>
+
+</body>
+</html>

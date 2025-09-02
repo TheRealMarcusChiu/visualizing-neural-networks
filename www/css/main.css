@@ -1,0 +1,86 @@
+#workspace {
+    position: relative;     /* parent must be relative for absolute children */
+}
+#tab-container {
+    position: absolute;
+}
+.tabs button {
+    background: #444;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    margin-right: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.tabs button.active {
+    background: #0077ff;
+}
+.tab-content {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+.tab-content.active {
+    display: block;
+}
+
+#toggle-training {
+    width: 60px;
+    align: center;
+}
+
+.canvas-containers {
+    white-space: nowrap;    /* prevent line breaks */
+}
+
+.relative-container {
+    position: relative;
+    display: inline-block;  /* keep side by side */
+    vertical-align: top;    /* align top edges */
+    margin-right: 10px;     /* optional spacing */
+}
+
+#canvas-input,
+#canvas-target {
+    display: block;
+}
+
+.gear {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.7);
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border-radius: 6px;
+    height: 27px;
+}
+
+
+#canvas-target-gear-popup {
+    position: absolute;
+    top: -200px;
+    right: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;              /* space between items */
+    align-items: flex-start; /* left-align */
+    padding: 10px;
+    background: #f5f5f5;  /* just for clarity */
+    border-radius: 6px;
+}
+
+#canvas-target-gear-popup label,
+#canvas-target-gear-popup select,
+#canvas-target-gear-popup input,
+#canvas-target-gear-popup button,
+#canvas-target-gear-popup .controls,
+#canvas-target-gear-popup #dropdown-list-container {
+    display: block; /* each takes full line */
+    margin: 2px 0;
+}

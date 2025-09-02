@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>SciChart.js – Dynamic 3D Mesh + Scatter</title>
+    <script src="https://cdn.jsdelivr.net/npm/scichart/index.min.js" crossorigin="anonymous"></script>
+    <style>
+        html, body, #scichart-root { margin:0; width:100%; height:100%; overflow:hidden; }
+    </style>
+</head>
+<body>
+<div id="scichart-root"></div>
+
+<script>
+    (async () => {
+      const {
+        SciChartSurface,
+        SciChart3DSurface,
+        NumericAxis3D,
+        Vector3,
+        SciChartJsNavyTheme,
+        MouseWheelZoomModifier3D,
+        OrbitModifier3D,
+        ResetCamera3DModifier,
+        SurfaceMeshRenderableSeries3D,
+        UniformGridDataSeries3D,
+        GradientColorPalette,
+        XyzDataSeries3D,
+        ScatterRenderableSeries3D,
+        EllipsePointMarker3D,
+        EDrawMeshAs
+      } = SciChart;
+
+      SciChartSurface.UseCommunityLicense();
+
+      // 1️⃣ Create the 3D surface
+      const { wasmContext, sciChart3DSurface } = await SciChart3DSurface.create("scichart-root", {
+        theme: new SciChartJsNavyTheme(),
+        worldDimensions: new Vector3(200, 100, 200),
+        cameraOptions: { position: new Vector3(250, 200, 250), target: new Vector3(0, 0, 0) }
+      });
+
+      // 2️⃣ Add axes
+      sciChart3DSurface.xAxis = new NumericAxis3D(wasmContext, { axisTitle: "X" });
+      sciChart3DSurface.yAxis = new NumericAxis3D(wasmContext, { axisTitle: "Y" });
+      sciChart3DSurface.zAxis = new NumericAxis3D(wasmContext, { axisTitle: "Z" });
+
+      // 3️⃣ Add interactivity
+      sciChart3DSurface.chartModifiers.add(
+        new MouseWheelZoomModifier3D(),
+        new OrbitModifier3D(),
+        new ResetCamera3DModifier()
+      );
+
+      // 4️⃣ Grid dimensions
+      const xSize = 60;
+      const zSize = 60;
+      const stepX = 1;
+      const stepZ = 1;
+
+      // 5️⃣ Create uniform grid
+      const grid = new UniformGridDataSeries3D(wasmContext, { xSize, zSize, stepX, stepZ });
+        grid.setYValue(0, 0, 0);
+
+      // 6️⃣ Initialize Y-values
+      const yAmplitude = 8;
+      const yBase = 0;
+      for (let z = 0; z < zSize; z++) {
+        for (let x = 0; x < xSize; x++) {
+          const nx = (x - xSize / 2) / (xSize / 2);
+          const nz = (z - zSize / 2) / (zSize / 2);
+          const r = Math.sqrt(nx*nx + nz*nz);
+          const y = yBase + yAmplitude * Math.sin(6*r) * (1 - r);
+<!--          grid.setYValue(x, z, y);-->
+        }
+      }
+
+      // 7️⃣ Surface color palette
+      const palette = new GradientColorPalette(wasmContext, {
+        gradientStops: [
+          { offset: 0, color: "#013A63" },
+          { offset: 0.25, color: "#2C7DA0" },
+          { offset: 0.5, color: "#95D5B2" },
+          { offset: 0.75, color: "#F6BD60" },
+          { offset: 1, color: "#EE6055" }
+        ]
+      });
+
+<!--      // 8️⃣ Create Surface Mesh series-->
+<!--      const surface = new SurfaceMeshRenderableSeries3D(wasmContext, {-->
+<!--        dataSeries: grid,-->
+<!--        stroke: "#00000055",-->
+<!--        strokeThickness: 1,-->
+<!--        drawMeshAs: EDrawMeshAs.SOLID_WIREFRAME,-->
+<!--        meshColorPalette: palette,-->
+<!--        minimum: -15,-->
+<!--        maximum: 15,-->
+<!--        opacity: 0.95-->
+<!--      });-->
+<!--      sciChart3DSurface.renderableSeries.add(surface);-->
+
+<!--      // 9️⃣ Scatter points overlay-->
+<!--      const scatterData = new XyzDataSeries3D(wasmContext);-->
+<!--      for (let z = 0; z < zSize; z++) {-->
+<!--        for (let x = 0; x < xSize; x++) {-->
+<!--          const px = x * stepX;-->
+<!--          const pz = z * stepZ;-->
+<!--          const py = grid.getYValue(x, z);-->
+<!--          scatterData.append(px, py, pz);-->
+<!--        }-->
+<!--      }-->
+<!--      const scatterSeries = new ScatterRenderableSeries3D(wasmContext, {-->
+<!--        dataSeries: scatterData,-->
+<!--        pointMarker: new EllipsePointMarker3D(wasmContext, { size: 3, fill: "rgba(255,255,255,0.8)" })-->
+<!--      });-->
+<!--      sciChart3DSurface.renderableSeries.add(scatterSeries);-->
+
+<!--      // 🔄 Dynamic animation-->
+<!--      let t = 0;-->
+<!--      function animate() {-->
+<!--        t += 0.03;-->
+<!--        for (let z = 0; z < zSize; z++) {-->
+<!--          for (let x = 0; x < xSize; x++) {-->
+<!--            const nx = (x - xSize / 2) / (xSize / 2);-->
+<!--            const nz = (z - zSize / 2) / (zSize / 2);-->
+<!--            const dist = Math.sqrt(nx*nx + nz*nz);-->
+<!--            const y = yBase + yAmplitude * Math.sin(8*dist - t) * (1 - dist);-->
+<!--            grid.setYValue(x, z, y);-->
+<!--          }-->
+<!--        }-->
+
+<!--        // Update scatter-->
+<!--        scatterData.clear();-->
+<!--        for (let z = 0; z < zSize; z++) {-->
+<!--          for (let x = 0; x < xSize; x++) {-->
+<!--            scatterData.append(x*stepX, grid.getYValue(x,z), z*stepZ);-->
+<!--          }-->
+<!--        }-->
+
+<!--        requestAnimationFrame(animate);-->
+<!--      }-->
+<!--      requestAnimationFrame(animate);-->
+    })();
+</script>
+</body>
+</html>

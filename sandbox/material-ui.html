@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MUI Example</title>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <!-- MUI v4 UMD -->
+    <script src="https://unpkg.com/@material-ui/core@4.12.4/umd/material-ui.development.js" crossorigin></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+    const { Button, Typography } = MaterialUI; // Works in v4
+
+    function App() {
+      return React.createElement("div", null,
+        React.createElement(Typography, { variant: "h4" }, "Hello MUI v4!"),
+        React.createElement(Button, { variant: "contained", color: "primary" }, "Click Me")
+      );
+    }
+
+    ReactDOM.render(
+      React.createElement(App),
+      document.getElementById("root")
+    );
+</script>
+</body>
+</html>

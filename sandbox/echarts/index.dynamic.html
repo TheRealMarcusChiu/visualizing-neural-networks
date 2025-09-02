@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ECharts 3D Real-time Graph</title>
+    <!-- ECharts + ECharts-GL -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+    <style>
+        body { margin:0; }
+        #chart { width:100vw; height:100vh; }
+    </style>
+</head>
+<body>
+<div id="chart"></div>
+
+<script>
+    var chart = echarts.init(document.getElementById('chart'));
+
+    var data = [];
+
+    var option = {
+      tooltip: {},
+      xAxis3D: { type: 'value', min: -10, max: 10 },
+      yAxis3D: { type: 'value', min: -10, max: 10 },
+      zAxis3D: { type: 'value', min: -10, max: 10 },
+      grid3D: {
+        boxWidth: 200,
+        boxHeight: 200,
+        boxDepth: 200,
+        viewControl: {
+          projection: 'perspective',
+          autoRotate: false,      // disable auto rotation
+          rotateSensitivity: 1,   // enable mouse drag rotate
+          zoomSensitivity: 1,     // enable mouse wheel zoom
+          panSensitivity: 1       // enable right-click drag pan
+        }
+      },
+      series: [{
+        type: 'scatter3D',
+        symbolSize: 10,
+        data: data
+      }]
+    };
+
+    chart.setOption(option);
+
+    function randomPoint() {
+      return [
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20
+      ];
+    }
+
+    // Real-time updates
+    setInterval(() => {
+      data.push(randomPoint());
+      if (data.length > 100) data.shift();
+
+      chart.setOption({
+        series: [{ data: data }]
+      });
+    }, 500);
+</script>
+</body>
+</html>

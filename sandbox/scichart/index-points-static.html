@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>SciChart.js 3D Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/scichart/index.min.js" crossorigin="anonymous"></script>
+    <style>
+        html, body, #scichart-root { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    </style>
+</head>
+<body>
+<div id="scichart-root"></div>
+<script>
+    // Wait for the SciChart namespace to be loaded
+    (async () => {
+      const {
+        SciChart3DSurface,
+        NumericAxis3D,
+        Vector3,
+        SciChartJsNavyTheme,
+        MouseWheelZoomModifier3D,
+        OrbitModifier3D,
+        ResetCamera3DModifier,
+        ScatterRenderableSeries3D,
+        XyzDataSeries3D,
+        EllipsePointMarker3D
+      } = SciChart;
+
+      // Create a 3D surface in the container with optional theme and camera settings
+      const { wasmContext, sciChart3DSurface } = await SciChart3DSurface.create("scichart-root", {
+        theme: new SciChartJsNavyTheme(),
+        worldDimensions: new Vector3(200, 200, 200),
+        cameraOptions: {
+          position: new Vector3(200, 200, 200),
+          target: new Vector3(0, 0, 0)
+        }
+      });
+
+      // Add axes
+      sciChart3DSurface.xAxis = new NumericAxis3D(wasmContext, { axisTitle: "X Axis" });
+      sciChart3DSurface.yAxis = new NumericAxis3D(wasmContext, { axisTitle: "Y Axis" });
+      sciChart3DSurface.zAxis = new NumericAxis3D(wasmContext, { axisTitle: "Z Axis" });
+
+      // Add 3D interactivity
+      sciChart3DSurface.chartModifiers.add(
+        new MouseWheelZoomModifier3D(),
+        new OrbitModifier3D(),
+        new ResetCamera3DModifier()
+      );
+
+      // Create and populate data series
+      const xyzData = new XyzDataSeries3D(wasmContext);
+      for (let i = 0; i < 200; i++) {
+        xyzData.append(
+          Math.random() * 100,
+          Math.random() * 100,
+          Math.random() * 100
+        );
+      }
+
+      // Create scatter series with point markers
+      const scatterSeries = new ScatterRenderableSeries3D(wasmContext, {
+        dataSeries: xyzData,
+        pointMarker: new EllipsePointMarker3D(wasmContext, {
+          fill: "steelblue",
+          size: 5
+        })
+      });
+      sciChart3DSurface.renderableSeries.add(scatterSeries);
+    })();
+</script>
+</body>
+</html>

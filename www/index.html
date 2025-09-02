@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Three.js Real-time 3D Mesh + Points</title>
+
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dropdown-multi.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/main-visual-node-network.css">
+
+    <script src="js/lib/covnet.min.js" defer></script>
+<!--    <script src="js/lib/three.min.js" defer></script>-->
+<!--    <script src="js/lib/OrbitControls.js" defer></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/loader.js"></script>
+    <script src="js/main.js" type="module" defer></script>
+</head>
+<body>
+
+<div id="workspace" style="width: 800px; height: 400px;">
+    <div id="tab-container" style="width: 800px; height: 400px;">
+        <div id="tab1-editor" class="tab-content">
+            <div id="editor" style="width: 800px; height: 400px;"></div>
+        </div>
+        <div id="tab2-node-network" class="tab-content active">
+            <div id="stage-container">
+                <svg id="stage" preserveAspectRatio="xMinYMin meet"></svg>
+            </div>
+        </div>
+    </div>
+    <button id="edit-load-model" class="gear">⚙️</button>
+</div>
+
+<div>
+    <button id="toggle-training">TRAIN</button>
+    <button id="view-2D" style="display: none;">Reset View</button>
+</div>
+<div class="canvas-containers">
+    <div class="relative-container">
+        <canvas id="canvas-input" width="400" height="400"></canvas>
+        <button id="edit-canvas-input-2d" class="gear" style="font-size: 15px;">2D</button>
+    </div>
+    <div class="relative-container">
+        <canvas id="canvas-target" width="400" height="400"></canvas>
+        <button id="edit-canvas-target-2d" class="gear" style="top: 10px; right: 45px; font-size: 15px;">2D</button>
+        <button id="edit-canvas-target-gear" class="gear">⚙️</button>
+
+        <div id="canvas-target-gear-popup">
+            <select id="dropdown-layer" style="display: none;"></select><label for="dropdown-layer"></label>
+            <select id="dropdown-node" style="display: none;"></select><label for="dropdown-node"></label>
+
+            <input type="checkbox" id="undo-activation"><label for="undo-activation">Undo Node Activation</label>
+            <input type="checkbox" id="undo-bias"><label for="undo-bias">Undo Node Bias</label>
+
+            <div class="controls">
+                <button id="select-all-prev-nodes">Select All</button>
+                <button id="deselect-all-prev-nodes">Deselect All</button>
+            </div>
+            <div id="dropdown-list-container"></div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
