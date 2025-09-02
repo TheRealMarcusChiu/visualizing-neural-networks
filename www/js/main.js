@@ -381,14 +381,15 @@ function updateSelected() {
 
 // Select all
 selectAllBtn.addEventListener("click", (e) => {
-    dropdownList.querySelectorAll("input").forEach(cb => cb.checked = true);
+    console.log("selected");
+    dropdownListContainer.querySelectorAll("input").forEach(cb => cb.checked = true);
     updateSelected();
     e.stopPropagation(); // Keep dropdown open
 });
 
 // Deselect all
 deselectAllBtn.addEventListener("click", (e) => {
-    dropdownList.querySelectorAll("input").forEach(cb => cb.checked = false);
+    dropdownListContainer.querySelectorAll("input").forEach(cb => cb.checked = false);
     updateSelected();
     e.stopPropagation(); // Keep dropdown open
 });
