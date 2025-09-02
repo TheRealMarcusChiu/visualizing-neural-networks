@@ -1,6 +1,27 @@
 body {
     font-family: sans-serif;
+    background: radial-gradient(1200px 800px at 20% 10%, #a7c5fd 0%, transparent 60%),
+              radial-gradient(1000px 600px at 80% 90%, #fdb7d6 0%, transparent 60%),
+              linear-gradient(180deg, #eef2f7 0%, #f6f8fb 100%);
 }
+
+.everything {
+    display: flex;
+    justify-content: center; /* horizontal */
+    align-items: center;     /* vertical */
+    height: 100vh;           /* full page height */
+}
+
+.stack-group {
+    display: flex;
+    flex-direction: column; /* vertical stacking */
+    align-items: center;    /* center horizontally */
+    background-color: #1e1e1e;
+    border: 10px solid #1e1e1e; /* 20px thick white border */
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(0,0,0,1.0);
+}
+
 
 #workspace {
     position: relative;     /* parent must be relative for absolute children */
@@ -38,7 +59,8 @@ body {
     position: relative;
     display: inline-block;  /* keep side by side */
     vertical-align: top;    /* align top edges */
-    margin-right: -5px;
+    margin-left: -2px;
+    margin-right: -2px;
 }
 
 #canvas-input,
