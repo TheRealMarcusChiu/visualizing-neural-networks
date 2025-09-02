@@ -1,0 +1,100 @@
+.glass-container {
+    display: flex;
+    align-items: center;       /* vertical alignment */
+    justify-content: center;   /* horizontal alignment */
+    gap: 15px;
+    width: 800px;
+    background-color: #1e1e1e;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.glass-button {
+  display: flex;
+  align-items: center;
+  backdrop-filter: blur(8px);
+  background: #353535;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  padding: 10px 10px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.glass-button:hover {
+  background: rgba(255,255,255,0.2);
+  transform: scale(1.03);
+}
+
+/* Play/Pause Icon */
+.glass-button svg {
+  width: 20px;
+  height: 20px;
+  fill: white;
+  margin-right: 8px;
+}
+
+/* Divider between toggle and dropdown */
+.divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255,255,255,0.3);
+  margin: 0 8px;
+}
+
+/* Dropdown arrow */
+.dropdown-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #353535;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+  padding: 5px;
+  z-index: 100;
+  min-width: 120px;
+}
+
+.dropdown-content button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: #353535;
+  color: white;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.dropdown-content button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.dropdown.show .dropdown-content {
+  display: block;
+}
+
+.counter {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  backdrop-filter: blur(8px);
+  min-width: 50px;
+  text-align: center;
+}

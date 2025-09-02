@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Glass Toggle with Dropdown</title>
+    <style>
+        body {
+          font-family: sans-serif;
+          background: #1a1a1a;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+
+        .glass-container {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+
+        .glass-button {
+          display: flex;
+          align-items: center;
+          backdrop-filter: blur(8px);
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.3);
+          border-radius: 12px;
+          padding: 10px 15px;
+          color: white;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+        }
+
+        .glass-button:hover {
+          background: rgba(255,255,255,0.2);
+          transform: scale(1.03);
+        }
+
+        /* Play/Pause Icon */
+        .glass-button svg {
+          width: 20px;
+          height: 20px;
+          fill: white;
+          margin-right: 8px;
+        }
+
+        /* Divider between toggle and dropdown */
+        .divider {
+          width: 1px;
+          height: 24px;
+          background: rgba(255,255,255,0.3);
+          margin: 0 8px;
+        }
+
+        /* Dropdown arrow */
+        .dropdown-btn {
+          background: transparent;
+          border: none;
+          color: white;
+          font-size: 16px;
+          cursor: pointer;
+          padding: 0 4px;
+        }
+
+        .dropdown-content {
+          display: none;
+          position: absolute;
+          top: 100%;
+          right: 0;
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.3);
+          backdrop-filter: blur(8px);
+          border-radius: 10px;
+          padding: 5px;
+          z-index: 100;
+          min-width: 120px;
+        }
+
+        .dropdown-content button {
+          width: 100%;
+          text-align: left;
+          border: none;
+          background: transparent;
+          color: white;
+          padding: 8px 10px;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+
+        .dropdown-content button:hover {
+          background: rgba(255,255,255,0.2);
+        }
+
+        .dropdown.show .dropdown-content {
+          display: block;
+        }
+
+        .counter {
+          background: rgba(255,255,255,0.1);
+          color: white;
+          padding: 10px 16px;
+          border-radius: 10px;
+          font-weight: bold;
+          backdrop-filter: blur(8px);
+          min-width: 50px;
+          text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="glass-container">
+    <div class="glass-button" id="toggle-button">
+        <svg id="play-icon" viewBox="0 0 24 24">
+            <polygon points="5,3 19,12 5,21"></polygon>
+        </svg>
+        <span id="button-text">Play</span>
+
+        <div class="divider"></div>
+
+        <div class="dropdown" id="dropdown-container">
+            <button class="dropdown-btn">▼</button>
+            <div class="dropdown-content">
+                <button id="reset-counter">Reset Counter</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="counter" id="counter">0</div>
+</div>
+
+<script>
+    const toggleBtn = document.getElementById('toggle-button');
+    const playIcon = document.getElementById('play-icon');
+    const btnText = document.getElementById('button-text');
+    const counterDiv = document.getElementById('counter');
+    let playing = false;
+    let counter = 0;
+    let interval;
+
+    // Play/Pause toggle
+    toggleBtn.addEventListener('click', (e) => {
+      if (e.target.closest('.dropdown')) return; // ignore clicks on dropdown
+
+      playing = !playing;
+      if (playing) {
+        btnText.textContent = 'Pause';
+        playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+        interval = setInterval(() => {
+          counter++;
+          counterDiv.textContent = counter;
+        }, 1000);
+      } else {
+        btnText.textContent = 'Play';
+        playIcon.innerHTML = '<polygon points="5,3 19,12 5,21"></polygon>';
+        clearInterval(interval);
+      }
+    });
+
+    // Dropdown toggle
+    const dropdown = document.getElementById('dropdown-container');
+    const dropdownBtn = dropdown.querySelector('.dropdown-btn');
+    dropdownBtn.addEventListener('click', (e) => {
+      dropdown.classList.toggle('show');
+      e.stopPropagation();
+    });
+
+    // Reset counter
+    document.getElementById('reset-counter').addEventListener('click', () => {
+      counter = 0;
+      counterDiv.textContent = counter;
+      dropdown.classList.remove('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.remove('show');
+      }
+    });
+</script>
+
+</body>
+</html>

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/editor.css">
     <link rel="stylesheet" href="css/main-visual-node-network.css">
+    <link rel="stylesheet" href="css/main-pause-play-iteration.css">
 
     <script src="js/lib/covnet.min.js" defer></script>
 <!--    <script src="js/lib/three.min.js" defer></script>-->
@@ -32,41 +33,66 @@
     <button id="edit-load-model" class="gear">⚙️</button>
 </div>
 
-<div>
-    <button id="toggle-training">TRAIN</button>
-    <button id="view-2D" style="display: none;">Reset View</button>
-</div>
-<div class="canvas-containers">
-    <div class="relative-container">
-        <canvas id="canvas-input" width="400" height="400"></canvas>
-        <button id="edit-canvas-input-2d" class="gear" style="font-size: 15px;">2D</button>
-    </div>
-    <div class="relative-container">
-        <canvas id="canvas-target" width="400" height="400"></canvas>
-        <button id="edit-canvas-target-2d" class="gear" style="top: 10px; right: 45px; font-size: 15px;">2D</button>
-        <button id="edit-canvas-target-gear" class="gear">⚙️</button>
+<div class="glass-container" style="z-index: 50;">
+    <div class="glass-button" id="toggle-button">
+        <svg id="play-icon" viewBox="0 0 24 24">
+            <polygon points="5,3 19,12 5,21"></polygon>
+        </svg>
+        <span id="button-text">Play</span>
 
-        <div id="canvas-target-gear-popup">
-            <div style="display: none;">
-                <select id="dropdown-layer"></select><label for="dropdown-layer"></label>
+        <div class="divider"></div>
+
+        <div class="dropdown" id="dropdown-container">
+            <button class="dropdown-btn">▼</button>
+            <div class="dropdown-content">
+                <button id="reset-counter">RESET</button>
             </div>
-            <div style="display: none;">
-                <select id="dropdown-node"></select><label for="dropdown-node"></label>
-            </div>
-            <div>
-                <input type="checkbox" id="undo-activation"><label for="undo-activation">Undo Node Activation</label>
-            </div>
-            <div>
-                <input type="checkbox" id="undo-bias"><label for="undo-bias">Undo Node Bias</label>
-            </div>
-            <div>Undo Previous Node Inputs</div>
-            <div>
-                <button id="select-all-prev-nodes">Select All</button>
-                <button id="deselect-all-prev-nodes">Deselect All</button>
-            </div>
-            <div id="dropdown-list-container"></div>
         </div>
     </div>
+
+    <div class="counter" id="counter">0</div>
+</div>
+
+<div class="relative-container">
+    <canvas id="canvas-input" width="400" height="400"></canvas>
+    <button id="edit-canvas-input-2d" class="gear" style="top: 10px; right: 29px; font-size: 15px;">2D</button>
+    <button id="edit-canvas-input-info" class="gear" style="font-size: 15px;">i</button>
+    <div id="canvas-input-info-popup" style="display: none;">
+        <div>double click to add green data point</div>
+        <div>double click + shift to add red data point</div>
+        <div>click + mouse pan to orbit around origin</div>
+    </div>
+</div>
+<div class="relative-container">
+    <canvas id="canvas-target" width="400" height="400"></canvas>
+    <button id="edit-canvas-target-2d" class="gear" style="top: 10px; right: 60px; font-size: 15px;">2D</button>
+    <button id="edit-canvas-target-gear" class="gear" style="top: 10px; right: 27px;">⚙️</button>
+    <button id="edit-canvas-target-info" class="gear" style="font-size: 15px;">i</button>
+    <div id="canvas-target-gear-popup" style="display: none;">
+        <div style="display: none;">
+            <select id="dropdown-layer"></select><label for="dropdown-layer"></label>
+        </div>
+        <div style="display: none;">
+            <select id="dropdown-node"></select><label for="dropdown-node"></label>
+        </div>
+        <div>
+            <input type="checkbox" id="undo-activation"><label for="undo-activation">Undo Node Activation</label>
+        </div>
+        <div>
+            <input type="checkbox" id="undo-bias"><label for="undo-bias">Undo Node Bias</label>
+        </div>
+        <div>Undo Previous Node Inputs</div>
+        <div>
+            <button id="select-all-prev-nodes">Select All</button>
+            <button id="deselect-all-prev-nodes">Deselect All</button>
+        </div>
+        <div id="dropdown-list-container"></div>
+    </div>
+
+    <div id="canvas-target-info-popup" style="display: none;">
+        <div>click on a node in the above diagram to view it's perspective at that node</div>
+    </div>
+
 </div>
 
 </body>

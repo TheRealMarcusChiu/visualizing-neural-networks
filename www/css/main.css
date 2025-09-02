@@ -1,6 +1,7 @@
 body {
     font-family: sans-serif;
 }
+
 #workspace {
     position: relative;     /* parent must be relative for absolute children */
 }
@@ -33,15 +34,11 @@ body {
     align: center;
 }
 
-.canvas-containers {
-    white-space: nowrap;    /* prevent line breaks */
-}
-
 .relative-container {
     position: relative;
     display: inline-block;  /* keep side by side */
     vertical-align: top;    /* align top edges */
-    margin-right: 10px;     /* optional spacing */
+    margin-right: -5px;
 }
 
 #canvas-input,
@@ -63,8 +60,32 @@ body {
     height: 27px;
 }
 
+#canvas-input-info-popup {
+    z-index: 100;
+    position: absolute;
+    top: -80px;
+    right: 10px;
+
+    font-size: 14px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;              /* space between items */
+    align-items: flex-start; /* left-align */
+    padding: 10px;
+    background: #f5f5f5;  /* just for clarity */
+    border-radius: 6px;
+
+    width: 250px;
+
+    /* Scrollable */
+    max-height: 150px;      /* set the height you want */
+    overflow-y: auto;       /* vertical scroll if content exceeds height */
+    overflow-x: hidden;     /* hide horizontal scroll */
+}
 
 #canvas-target-gear-popup {
+    z-index: 100;
     position: absolute;
     top: -165px;
     right: 10px;
@@ -89,4 +110,28 @@ body {
 #canvas-target-gear-popup #dropdown-list-container label {
     display: block; /* each takes full line */
     margin: 2px 0;
+}
+
+#canvas-target-info-popup {
+    z-index: 100;
+    position: absolute;
+    top: -50px;
+    right: 10px;
+
+    font-size: 14px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;              /* space between items */
+    align-items: flex-start; /* left-align */
+    padding: 10px;
+    background: #f5f5f5;  /* just for clarity */
+    border-radius: 6px;
+
+    width: 250px;
+
+    /* Scrollable */
+    max-height: 150px;      /* set the height you want */
+    overflow-y: auto;       /* vertical scroll if content exceeds height */
+    overflow-x: hidden;     /* hide horizontal scroll */
 }

@@ -25,9 +25,7 @@ layer_defs = [
      // --------- EDIT STOP -----------
 
      {type: 'softmax', num_classes: 2}                      // DO NOT CHANGE THIS LAYER
-];
-
-`);
+];`);
 
 var editor;
 
@@ -118,7 +116,6 @@ function validateModel(layer_defs) {
     const errors = layer_defs.map(layer_def => validateLayerDef(layer_def))
         .reduce((acc, curr) => acc.concat(curr), []);
     if (errors.length > 0) {
-        console.log("errors: " + errors.length);
         alert(errors.join("\n"));
     }
 }
@@ -139,6 +136,11 @@ function loadModel() {
     showTab("tab2-node-network");
     nodeNetworkBuild(layer_defs, setTarget);
     setTarget(targetLayerIndex, targetNodeIndex);
+
+    counter = 0;
+    if (counterDiv !== undefined) {
+        counterDiv.textContent = counter;
+    }
 
     loadNetAndTrainer();
     updateDropdownLayerOptions(layer_defs);
@@ -319,6 +321,11 @@ checkboxUndoBias.addEventListener("change", function() {
 // START //
 ///////////
 
+const editCanvasInputInfoButton = document.getElementById("edit-canvas-input-info");
+const editCanvasInputInfoPopup = document.getElementById("canvas-input-info-popup");
+const editCanvasTargetInfoButton = document.getElementById("edit-canvas-target-info");
+const editCanvasTargetInfoPopup = document.getElementById("canvas-target-info-popup");
+
 const editCanvasTargetGearButton = document.getElementById("edit-canvas-target-gear");
 const editCanvasTargetGearPopup = document.getElementById("canvas-target-gear-popup");
 const dropdownListContainer = document.getElementById("dropdown-list-container");
@@ -341,7 +348,7 @@ function updateDropdownPrevNodesOptions(layer_defs) {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.value = i;
-        checkbox.checked = true;
+        checkbox.checked = false;
 
         label.appendChild(checkbox);
         label.appendChild(document.createTextNode(text));
@@ -387,24 +394,60 @@ deselectAllBtn.addEventListener("click", (e) => {
     e.stopPropagation(); // Keep dropdown open
 });
 
+function toggleEditCanvasInputInfoPopup() {
+    const computedDisplay = window.getComputedStyle(editCanvasInputInfoPopup).display;
+    if (computedDisplay === "none") {
+        const popup = document.getElementById("canvas-input-info-popup");
+        popup.style.display = "flex";
+    } else {
+        const popup = document.getElementById("canvas-input-info-popup");
+        popup.style.display = "none";  // hide it
+    }
+}
+
+function toggleEditCanvasTargetInfoPopup() {
+    const computedDisplay = window.getComputedStyle(editCanvasTargetInfoPopup).display;
+    if (computedDisplay === "none") {
+        const popup = document.getElementById("canvas-target-info-popup");
+        popup.style.display = "flex";
+    } else {
+        const popup = document.getElementById("canvas-target-info-popup");
+        popup.style.display = "none";  // hide it
+    }
+}
 
 function toggleEditCanvasTargetGearPopup() {
     const computedDisplay = window.getComputedStyle(editCanvasTargetGearPopup).display;
     if (computedDisplay === "none") {
-        editCanvasTargetGearPopup.style.display = "flex";  // show it
-        console.log(editCanvasTargetGearPopup.style.display);
+        const popup = document.getElementById("canvas-target-gear-popup");
+        popup.style.display = "flex";
     } else {
-        editCanvasTargetGearPopup.style.display = "none";  // hide it
+        const popup = document.getElementById("canvas-target-gear-popup");
+        popup.style.display = "none";  // hide it
     }
 }
 
+editCanvasInputInfoButton.addEventListener("click", (e) => {
+    toggleEditCanvasInputInfoPopup();
+});
+editCanvasTargetInfoButton.addEventListener("click", (e) => {
+    toggleEditCanvasTargetInfoPopup();
+});
 editCanvasTargetGearButton.addEventListener("click", (e) => {
     toggleEditCanvasTargetGearPopup();
 });
 
 // Click outside closes editCanvasTargetGearPopup
 document.addEventListener("click", (e) => {
-    editCanvasTargetGearPopup.style.display = "none";
+    if (!editCanvasTargetGearPopup.contains(e.target) && !editCanvasTargetGearButton.contains(e.target)) {
+        editCanvasTargetGearPopup.style.display = "none";
+    }
+    if (!editCanvasInputInfoPopup.contains(e.target) && !editCanvasInputInfoButton.contains(e.target)) {
+        editCanvasInputInfoPopup.style.display = "none";
+    }
+    if (!editCanvasTargetInfoPopup.contains(e.target) && !editCanvasTargetInfoButton.contains(e.target)) {
+        editCanvasTargetInfoPopup.style.display = "none";
+    }
 });
 
 // Initial update
@@ -425,8 +468,9 @@ loadModel();
 // Training Logic //
 ////////////////////
 
-function train() {
-    console.log("training");
+function trainSingleIteration() {
+    counter++;
+    counterDiv.textContent = counter;
     var input = new convnetjs.Vol(1, 1, 2);
     for (var iters = 0; iters < 20; iters++) {
         for (var i = 0; i < training_data.length; i++) {
@@ -438,26 +482,72 @@ function train() {
 }
 const button_training = document.getElementById('toggle-training');
 let trainingIntervalID = null;
-function toggleTraining() {
-    if (button_training.textContent === 'TRAIN') {
-        button_training.textContent = 'PAUSE';
-        if (trainingIntervalID === null) { // prevent multiple intervals
-            trainingIntervalID = setInterval(() => {
-                train();
-            }, 125);
-        }
-    } else {
-        button_training.textContent = 'TRAIN';
-        if (trainingIntervalID !== null) {
-            clearInterval(trainingIntervalID);
-            trainingIntervalID = null;
-        }
+function startTraining() {
+    playing = true;
+    if (trainingIntervalID === null) { // prevent multiple intervals
+        trainingIntervalID = setInterval(() => {
+            trainSingleIteration();
+        }, 125);
     }
 }
-button_training.addEventListener('click', () => {
+function pauseTraining() {
+    playing = false;
+    if (trainingIntervalID !== null) {
+        clearInterval(trainingIntervalID);
+        trainingIntervalID = null;
+    }
+}
+function toggleTraining() {
+    playing = !playing;
+    if (playing) {
+        btnText.textContent = 'Pause';
+        playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+        startTraining();
+    } else {
+        btnText.textContent = 'Play';
+        playIcon.innerHTML = '<polygon points="5,3 19,12 5,21"></polygon>';
+        pauseTraining();
+    }
+}
+
+var toggleBtn = document.getElementById('toggle-button');
+var playIcon = document.getElementById('play-icon');
+var btnText = document.getElementById('button-text');
+var counterDiv = document.getElementById('counter');
+
+var playing = false;
+var counter = 0;
+
+// Play/Pause toggle
+toggleBtn.addEventListener('click', (e) => {
+    if (e.target.closest('.dropdown')) return; // ignore clicks on dropdown
     toggleTraining();
 });
+
 toggleTraining();
+
+// Dropdown toggle
+const dropdown = document.getElementById('dropdown-container');
+const dropdownBtn = dropdown.querySelector('.dropdown-btn');
+dropdownBtn.addEventListener('click', (e) => {
+    dropdown.classList.toggle('show');
+    e.stopPropagation();
+});
+
+// Reset counter
+document.getElementById('reset-counter').addEventListener('click', () => {
+    loadModel();
+    counter = 0;
+    counterDiv.textContent = counter;
+    dropdown.classList.remove('show');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  if (!dropdown.contains(e.target)) {
+    dropdown.classList.remove('show');
+  }
+});
 
 
 
@@ -485,7 +575,7 @@ function view2D(manifests) {
         m.camera.position.set(0, 20, 0);
     });
 }
-['view-2D', 'edit-canvas-input-2d', 'edit-canvas-target-2d'].forEach(id => {
+['edit-canvas-input-2d', 'edit-canvas-target-2d'].forEach(id => {
     const elem = document.getElementById(id);
     elem.addEventListener("click", () => {
         view2D(manifests);
@@ -562,7 +652,7 @@ function animate() {
 
             var output_node = 0;
             for (let j = 0; j < numPrevNodes; j++) {
-                if (selectedPrevNodeIndices.includes(j)) {
+                if (!selectedPrevNodeIndices.includes(j)) {
                     const prevNodeOutput = net.layers[layerIndexPrev].out_act.w[j];
                     const curWeight = net.layers[layerIndexCurFC].filters[targetNodeIndex].w[j]
                     output_node += prevNodeOutput * curWeight;
