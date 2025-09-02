@@ -668,6 +668,8 @@ function animate() {
                         if (output_node < 0) {
                             output_node = 0.0;
                         }
+                    } else if (act_type === 'tanh') {
+                        output_node = Math.tanh(output_node);
                     } else if (act_type === 'softmax') {
                         if (targetNodeIndex === 0) {
                             const other_node = net.layers[layerIndexCurFC].out_act.w[1];
