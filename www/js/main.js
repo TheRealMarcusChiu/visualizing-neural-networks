@@ -482,12 +482,14 @@ function trainSingleIteration() {
 }
 const button_training = document.getElementById('toggle-training');
 let trainingIntervalID = null;
+var trainingIntervalFastest = 100;
+var trainingIntervalCur = 200;
 function startTraining() {
     playing = true;
     if (trainingIntervalID === null) { // prevent multiple intervals
         trainingIntervalID = setInterval(() => {
             trainSingleIteration();
-        }, 125);
+        }, trainingIntervalCur);
     }
 }
 function pauseTraining() {
@@ -514,6 +516,9 @@ var toggleBtn = document.getElementById('toggle-button');
 var playIcon = document.getElementById('play-icon');
 var btnText = document.getElementById('button-text');
 var counterDiv = document.getElementById('counter');
+var speedSlider = document.getElementById('speed-slider');
+
+  // Trigger on value change
 
 var playing = false;
 var counter = 0;
@@ -540,6 +545,13 @@ document.getElementById('reset-counter').addEventListener('click', () => {
     counter = 0;
     counterDiv.textContent = counter;
     dropdown.classList.remove('show');
+});
+
+speedSlider.addEventListener('input', () => {
+    console.log(speedSlider.value);
+    trainingIntervalCur = trainingIntervalFastest / ((speedSlider.value + 1.0) / 100.0);
+    pauseTraining();
+    startTraining();
 });
 
 // Close dropdown when clicking outside
