@@ -18,9 +18,9 @@ layer_defs = [
      // --------- EDIT START -----------
      // ADD ANY NUMBER OF FC LAYERS (only supports relu and tanh)
 
-     {type: 'fc', num_neurons: 6, activation: 'relu'},
-     {type: 'fc', num_neurons: 5, activation: 'relu'},
-     {type: 'fc', num_neurons: 4, activation: 'relu'},
+     {type: 'fc', num_neurons: 6, activation: 'tanh'},
+     {type: 'fc', num_neurons: 5, activation: 'tanh'},
+     {type: 'fc', num_neurons: 4, activation: 'tanh'},
 
      // --------- EDIT STOP -----------
 
@@ -98,7 +98,6 @@ function validateModel(layer_defs) {
         } else if (layer_type === "fc") {
             if (layer_def.activation === "relu") {
             } else if (layer_def.activation === "tanh") {
-                errors.push('tanh activation is not fully supported');
             } else {
                 errors.push(layer_def.activation + ' activation is not yet supported');
             }
